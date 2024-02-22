@@ -1,4 +1,5 @@
 from random import choice, randint 
+from .bonus import SwordBonus
 
 class Swords:
     who_has_buff = [] #Ця класова змінна відслідковує на які об'єкт накладено баф
@@ -27,8 +28,13 @@ class Swords:
     @classmethod
     def create_from_rarity(cls, name:str, rarity:str):
         """Цей конструктор використовується, коли отримується меч з крафту"""
+        bonus_list = [method for method in dir(SwordBonus) if callable(getattr(SwordBonus, method)) and not method.startswith("__")]
+        bonus = None
+        if rarity in list(cls.rarity_map.keys())[-3:]:
+            bonus = getattr(SwordBonus, choice(bonus_list))
+
         if rarity in cls.rarity_map.keys():
-            return cls(name, rarity, damage=3*cls.rarity_map[rarity], vitality=5*cls.rarity_map[rarity])
+            return cls(name, rarity, damage=3*cls.rarity_map[rarity], vitality=5*cls.rarity_map[rarity], bonus = bonus)
         raise AttributeError(f"Неправильно задано рідкісність предмету, повинно бути один з {list(cls.rarity_map.keys())}")
 
     @classmethod
