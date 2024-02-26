@@ -1,5 +1,52 @@
-from random import choice, randint 
-from .bonus import SwordBonus
+from random import choice, randint
+from typing import Any
+class SwordBonus: 
+    """Описує функціонал бонусів"""
+    count = 0
+
+    def __init__(self) -> None:
+        SwordBonus.count += 1
+
+    @staticmethod
+    def poison(item) -> str:
+        if SwordBonus.__check_obj(item):
+            item.damage += 1
+            return f"Застосовано бонус отрути до {item.name}"
+
+    @staticmethod
+    def confusion(item) -> str:
+        if SwordBonus.__check_obj(item):
+            item.damage += 2
+            return f"Застосовано бонус спантеличеність до {item.name}"
+
+    @staticmethod
+    def strength(item) -> str:
+        if SwordBonus.__check_obj(item): 
+            item.vitality += 1
+            return f"Застосовано бонус сили. до {item.name}"
+    
+    @staticmethod
+    def __check_obj(obj: Any) -> bool:
+        """Реалізували приватний метод, який перевіряє, чи ми працюємо з правильним об'єктом"""
+        if isinstance(obj, Swords):
+            return True
+        raise ValueError(f"Неможливо застосувати бонус до класу {type(obj)}") 
+
+    def __str__(self) -> str:
+        """Представлення об'єкта у вигляді рядка, Це буде викликатись коли застосовуємо функцію прінт"""
+        return f"Клас SwordBonus: реалізує функціонал бонусів, поточний обєкт має хеш {self.__hash__()}"
+
+    def __repr__(self) -> str:
+        """Канонічне представлення об'єкту"""
+        return f"SwordBonus()"
+    
+    def __len__(self) -> int:
+        """Застосування методу довжини поверне кількість бонусів які реалізовані в даному класі"""
+        return len(SwordBonus.bonus_list())
+    
+    @staticmethod
+    def bonus_list() -> list:
+        return [method for method in dir(SwordBonus) if callable(getattr(SwordBonus, method)) and not method.startswith("__") and not method.startswith("_")]
 
 class Swords:
     who_has_buff = [] #Ця класова змінна відслідковує на які об'єкт накладено баф
@@ -28,7 +75,7 @@ class Swords:
     @classmethod
     def create_from_rarity(cls, name:str, rarity:str):
         """Цей конструктор використовується, коли отримується меч з крафту"""
-        bonus_list = [method for method in dir(SwordBonus) if callable(getattr(SwordBonus, method)) and not method.startswith("__")]
+        bonus_list = SwordBonus.bonus_list()
         bonus = None
         if rarity in list(cls.rarity_map.keys())[-3:]:
             bonus = getattr(SwordBonus, choice(bonus_list))
