@@ -9,21 +9,30 @@ class SwordBonus:
 
     @staticmethod
     def poison(item) -> str:
+        """Накладення отрути"""
         if SwordBonus.__check_obj(item):
             item.damage += 1
             return f"Застосовано бонус отрути до {item.name}"
 
     @staticmethod
     def confusion(item) -> str:
+        """Накладення конфузії"""
         if SwordBonus.__check_obj(item):
             item.damage += 2
             return f"Застосовано бонус спантеличеність до {item.name}"
 
     @staticmethod
     def strength(item) -> str:
+        """Накладення міцності"""
         if SwordBonus.__check_obj(item): 
             item.vitality += 1
             return f"Застосовано бонус сили. до {item.name}"
+        
+    @staticmethod
+    def _nothing(item) -> str:
+        """Пустий бонус для мечів з низькою якістю"""
+        if SwordBonus.__check_obj(item):
+            return f"Меч {item.name} має занизьку рідкісність!"
     
     @staticmethod
     def __check_obj(obj: Any) -> bool:
@@ -45,7 +54,7 @@ class SwordBonus:
         return len(SwordBonus.bonus_list())
     
     @staticmethod
-    def bonus_list() -> list:
+    def _bonus_list() -> list:
         return [method for method in dir(SwordBonus) if callable(getattr(SwordBonus, method)) and not method.startswith("__") and not method.startswith("_")]
 
 class Swords:
@@ -53,7 +62,7 @@ class Swords:
     rarity_map = {"Basic": 1, "Green": 2, "Blue": 5, "Epic": 8, "Legendary": 10} # Це мапа, яка вказує коефіцієнт збільшення атрибутів відносно Рідкісності предмету
 
 
-    def __init__(self, name:str, rarity:str, damage:int, vitality:int, bonus:str = None) -> None: 
+    def __init__(self, name:str, rarity:str, damage:int, vitality:int, bonus: callable) -> None: 
         """Конструктор для створення об'єкту Меч.
         name: поля для імені;
         rarity: рідкість предмету;
@@ -66,7 +75,9 @@ class Swords:
         self.rarity = rarity
         self.damage = damage
         self.vitality = vitality
-        self.bonus = bonus
+        self.bonus = bonus.__doc__ # тут ми просто будемо знати, що бонус був застосований до нашого об'єкту
+        print(bonus)
+        bonus(self) # тут ми застосовуємо бонус до нашого поточного обєкту
 
         self.buff_damage = 0
         self.buff_vitality = 0
@@ -75,8 +86,8 @@ class Swords:
     @classmethod
     def create_from_rarity(cls, name:str, rarity:str):
         """Цей конструктор використовується, коли отримується меч з крафту"""
-        bonus_list = SwordBonus.bonus_list()
-        bonus = None
+        bonus_list = SwordBonus._bonus_list()
+        bonus = SwordBonus._nothing
         if rarity in list(cls.rarity_map.keys())[-3:]:
             bonus = getattr(SwordBonus, choice(bonus_list))
 
@@ -153,8 +164,8 @@ class Swords:
         r = randint(0, 4)
         if r > 2:
             print(f"Меч отримав негативний ефект {name}, повертаємо дебаф на 1")
-            return 1
-        return 0
+            return True
+        return False
 
     @property
     def get_name(self) -> str:

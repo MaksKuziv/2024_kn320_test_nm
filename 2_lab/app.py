@@ -7,12 +7,17 @@ from random import randint
 if __name__ == "__main__":
     print("Start game")
     player1 = input("Enter the name of the first player:")
-    player2 = input("Enter the name of the second player:")
     c = Swords.create_random_rarity("Катана")
     print(f"Гравець {player1} отримує Меч:", c.info)
+    player2 = input("Enter the name of the second player:")
     d = Swords.create_random_rarity("Шпага")
     print(f"Гравець {player2} отримує Меч:", d.info)
 
+    # Дозволимо гравцю впливати на те як ми будемо змагатись на отриманих мечах
+    player1_buff = input(f"{player1} ведіть 1 для бафу шкоди, 2 для бафу міцності: ")
+    if player1_buff in ["1", "2"]:
+        print("Застосовано баф на нанесення шкоди" if player1_buff == "1" else "Застосовано баф на міцність")
+    
     # емулюємо як ми користуємось нашим мечем, накладаємо баф, меч старіє/зношується від
     # використання та ми проводимо бої де його міцність зменшується
     c.get_baff_vitality(2)
