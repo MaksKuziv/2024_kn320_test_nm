@@ -13,6 +13,44 @@
     1. Програма вивела наступне ![](./start_game.png) 
     1. В наступних роботах будемо писати тести та виловлювати баги в нашій грі;
     1. Навчились ...
+    1. ⭐ дайте відповідь на запитання:
+        1. Чому коли передаємо значення None створюється обєкт з іменем Anonymous?
+            - Коли ви передаєте значення None в конструктор класу MyName, він використовує значення за замовчуванням для імені, яке  встановлено як "Anonymous". Це робиться для того, щоб гарантувати, що у кожного екземпляра класу MyName буде ім'я, навіть якщо воно не явне.
+        1. Як змінити текст привітання при виклику методу say_hello()? Допишіть цю частину коду.
+            ```python 
+            class MyName:
+                # ...
+                @staticmethod
+                def say_hello(message="Hello to everyone!", name=None):
+                    """Static method
+                    """
+                    if name is not None:
+                        return f"You say: {message}, {name}!"
+                    return f"You say: {message}"
+            ```
+        1. Допишіть функцію в класі яка порахує кількість букв і імені (підказка: використайте функцію len());
+            ```python
+            class MyName:
+            # ...
+
+            def count_letters(self):
+                return len(self.name)
+            ```
+        1. Порахуйте кількість імен у списку names та порівняйте із виведеним результатом. Дайте відповідь чому маємо різну кількість імен?
+            ```python
+            names = ("Bohdan", "Marta", None)
+            # Кількість елементів у списку
+            number_of_names = len(names)
+            # Кількість не None значень
+            number_of_non_empty_names = 0
+            for name in names:
+                if name is not None:
+                    number_of_non_empty_names += 1
+            print(f"Кількість імен: {number_of_names}")
+            print(f"Кількість не None значень: {number_of_non_empty_names}")
+
+            ```
+            - У списку names 3 елементи, але 2 з них не None. Це тому, що один з елементів списку має значення None.
 
 ---
 ### Висновок:
