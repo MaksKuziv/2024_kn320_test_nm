@@ -2,3 +2,4 @@ project_requests/
 project_numpy/
 venv_*/
 .venv/
+__pychahe__/
