@@ -69,6 +69,8 @@ class SwordBonus:
         # assert obj.__repr__() == "Swords()", f"Даний обєкт {obj.__class__} не відноситься до класу Swords()"
         # t = ["<class '__main__.Swords'>", "<class '__main__.SwordMock'>", "<class '__main__.Axe'>"]
         # assert str(type(obj)) in t, f"Невідповідність типів переданого обєкту {type(obj)} до потрібного {t}"
+        
+        # Спрощуємо перевірку, дивимось лише чи даний клас належить до потрібного
         if isinstance(obj, Axe):
             return True
         return False
