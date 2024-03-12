@@ -2,6 +2,7 @@ import unittest
 from axe import Axe
 from swords_bonus import SwordBonus
 from sword import Swords
+from app import SWORD_NAMES, create_players
 
 # клас для тестування повинен починатись з слова Test
 class TestSwordBonus(unittest.TestCase):
@@ -123,6 +124,21 @@ class TestSwordsCreation(unittest.TestCase):
         s = Swords.create_random_rarity(name)
         self.assertIn(s.rarity, Swords.rarity_map.keys(), f"Рідкісність меча не відповідає заданим в {Swords.rarity_map.keys()}.")
         self.assertTrue(s.name == name, "Меч з випадковою рідкіснісю має неправильне Імя.")
+
+    def test_player_creation(monkeypatch):
+        """Тестуємо правильність ініціалізаціцї гравців та їх Мечів"""
+        # даний тест буде розпізнаватись лише бібліотекою PyTest, unittest його не побачить
+
+        # створюємо гравця
+        monkeypatch.setattr('builtins.input', lambda _: "Богдан")
+        p = create_players()
+        #assert False # Даний тест впаде, ми просто хочемо протестувати чи це буде працювати
+        assert isinstance(p, Swords)
+        assert p.player == "Богдан"
+        assert p.name in SWORD_NAMES
+
+
+
 
 # Ця конструкція if не дозволить запустити цей код якщо ми його імпортнемо в інший файл
 if __name__ == '__main__':
