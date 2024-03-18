@@ -24,9 +24,9 @@ class SwordBonus:
     
     @staticmethod
     def bonus_berserk(item) -> str:
-        """Ефукт Берсерка, шкода +10"""
+        """Ефукт Берсерка, шкода збільшується вдвічі"""
         if SwordBonus.__check_obj(item):
-            item.damag += 10
+            item.damag *= 2
             return f"Застосовано бонус Берсерка {item.name}"
     
     @staticmethod

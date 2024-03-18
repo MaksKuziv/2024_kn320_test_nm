@@ -140,3 +140,6 @@ class Swords:
     def health(self):
         """Проперті яка визначає всю витривалість ХП який має обєкт"""
         return self.vitality
+
+    def __repr__(self) -> str:
+        return "Swords()"

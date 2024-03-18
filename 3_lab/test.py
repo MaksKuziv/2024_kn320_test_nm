@@ -1,4 +1,5 @@
 import unittest
+from random import randint, choice
 from axe import Axe
 from swords_bonus import SwordBonus
 from sword import Swords
@@ -15,6 +16,7 @@ class TestSwordBonus(unittest.TestCase):
     def setUp(self) -> None:
         print("Проводимо початкову ініціалізацію для тестів....")
         self.sw = Axe() # створений макет на який можемо накласти баф отрути
+        self.sword = Swords(choice(SWORD_NAMES), "Legend", 1, 1, SwordBonus._nothing) # ми підмінили наш макет на реальний меч
         self.sb = SwordBonus() # імплементація бонусів
         self.d, self.v = self.sw.damag, self.sw.vitality  # Початкове значення характеристик витягуємо через подвійне присвоєння
         return super().setUp()
@@ -67,6 +69,31 @@ class TestSwordBonus(unittest.TestCase):
         # Якщо ми передали неправильний обєкт, до якого не можна накласти баф, то ам просто поварнеться значення None
         self.assertIsNone(self.sb.bonus_confusion(1), "До цього обєкне не можна застосовувати накладення бафів, неправильний обєкт")
         
+    def test_bonus_berserk(self):
+        """Тестуємо бонус Берсерка"""
+        # Невелика перевірка чи ми дійсько працюємо з Мечем
+        self.assertTrue(self.sw.__repr__() is Axe.__repr__(self.sw), f"{self.sw.__repr__()} Не відноситься до класу Меча {Swords.__repr__(self.sw)}")
+        # початкова ініціалізація шкоди = 0, тому ставимо якесь значення яке ми хочемо протестувати
+        min_damage = 5
+        self.sw.damag = randint(min_damage, 10)
+        # ініціалізуємо накладання бонусу на Меч
+        result = self.sb.bonus_berserk(self.sw)
+
+        # Ефект бурсерка подвоюює атаку, протестуємо це
+        self.assertGreater(self.sw.damag, min_damage * 2 - 1) # шкода має бути збільшена
+        # і збільшена у 2 рази
+        self.assertTrue(self.sw.damag / min_damage >= 2, "Шкода від бафу берсеркера має бути більшою хочаб у 2 рази")
+        # значення міцності не посинне бути зміненим і залишитись 0 як було ініціалізовано у класі Axe
+        self.assertTrue(self.sw.vitality == 0)
+        self.assertIsInstance(result, str, "Повернений результат повинен бути стрічкою.")
+
+    def test_bonus_apply_on_legendary_rarity(self):
+        """Тестуємо що для меча з Легендарною ріднісністю буде додано випадковий бонус"""
+        # викиристаємо альтернативний конструктор та створимо Легендарний меч
+        s = Swords.create_from_rarity(choice(SWORD_NAMES), "Legend")
+        self.assertFalse(s.bonus == SwordBonus._nothing.__doc__, f"Легендарна рідкісність повинна мати бонус відмінний від {SwordBonus._nothing.__doc__}")
+        # TODO: ЦЕ ТЕСТ НЕ ПРОХОДИТЬ, потрібно фіксити клас де накладаються бафи
+        self.assertTrue(s.damag > (3 * Swords.rarity_map["Legend"]) or s.vitality > (5 * Swords.rarity_map["Legend"]), f"Накладений бонус {s.bonus} не збільшив атрибути шкоди {s.damag} або витривалості {s.vitality}")
 
 class TestApplyBuffs(unittest.TestCase):
     """Клас призначений для тестування накладання бафів на меч"""
