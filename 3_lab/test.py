@@ -106,6 +106,12 @@ class TestSwordBonus(unittest.TestCase):
         # перевіряємо що накладений бонус збільшив атрибути Меча
         self.assertTrue(s.damag > (3 * Swords.rarity_map["Legend"]) or s.vitality > (5 * Swords.rarity_map["Legend"]), f"Накладений бонус {s.bonus} не збільшив атрибути шкоди {s.damag} або витривалості {s.vitality}")
 
+    def test_no_bonus_for_low_rarity(self):
+        """Тестуємо що на Меч з низькою якістю не буде накладено бонусів"""
+        s = Swords.create_from_rarity(choice(SWORD_NAMES), "Basic")
+        d = s.apply_bonus()
+        self.assertEqual(s.bonus, d, f"На меч з якістю Basic має бути накладено бонус: {SwordBonus._nothing.__doc__}")
+
 class TestApplyBuffs(unittest.TestCase):
     """Клас призначений для тестування накладання бафів на меч"""
     def setUp(self) -> None:
