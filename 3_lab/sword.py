@@ -7,20 +7,19 @@ class Swords:
     # Це мапа яка вказує коефіцієнт збільшення атрибутів відносно Рідкісності предмету
     rarity_map = {"Basic": 1, "White": 2, "Green": 3, "Blue": 5, "Yellow": 7, "Epic": 9, "Legend": 10} 
     
-    def __init__(self, name:str, rarity:str, damag:int, vitality:int, bonus: callable) -> None: # Це є свого роду конструктор
+    def __init__(self, name:str, rarity:str, damag:int, vitality:int) -> None: # Це є свого роду конструктор
         """Конструктор для створення обєкту Меч.
         name: поля для імені;
         rarity: Рідкість предмету; 
         damag: Нанесення шкоди;
         vitality: Міцність предмету;
-        bonus: необовязковий аргумент;
+        bonus: необовязковий аргумент, буде містити опис бонуса який можна застосувати до обєкта;
         """
         self.name = name # це є атрибути обєкта, їх можна змінювати після створення обєкту
         self.rarity = rarity
         self.damag = damag
         self.vitality = vitality
-        self.bonus = bonus.__doc__ # тут ми просто будемо знати що за бонус був застосований до нашого обєкту
-        bonus(self) # тут ми застосовуємо бонус до нашого поточного обєкту
+        self.bonus = SwordBonus._nothing.__doc__ # тут ми просто будемо знати що за бонус був застосований до нашого обєкту
 
         self.buff_damage = 0
         self.buff_vitality = 0
@@ -29,13 +28,8 @@ class Swords:
     @classmethod
     def create_from_rarity(cls, name:str, rarity:str):
         """Це конструктор використовуємо коли ми отримуємо меч з крафту"""
-        bonus_list = SwordBonus.list_bonus_methods()
-        bonus = SwordBonus._nothing
-        if rarity in list(cls.rarity_map.keys())[-3:]:
-            bonus = getattr(SwordBonus, choice(bonus_list))
-
         if rarity in cls.rarity_map.keys():
-            return cls(name, rarity, damag=3*cls.rarity_map[rarity], vitality=5*cls.rarity_map[rarity], bonus = bonus)
+            return cls(name, rarity, damag=3*cls.rarity_map[rarity], vitality=5*cls.rarity_map[rarity])
         raise AttributeError(f"Неправильно задано рідкісність предмету, повинно бути один з {list(cls.rarity_map.keys())}")
     
     @classmethod
@@ -44,6 +38,18 @@ class Swords:
         rarity = choice(list(cls.rarity_map.keys()))
         return cls.create_from_rarity(name, rarity)
     
+    def apply_bonus(self):
+        """Застосовуємо накладання бонусу"""
+        # Вибираємо бонуси з доступного списку
+        bonus_list = SwordBonus.list_bonus_methods()
+        bonus = SwordBonus._nothing
+        if self.rarity in list(Swords.rarity_map.keys())[-3:]:
+            # Якщо значення рідкісністі буде досить високим, то застосовуємо бонус
+            bonus = getattr(SwordBonus, choice(bonus_list))
+        bonus(self)
+        self.bonus = bonus.__doc__
+        return bonus.__doc__
+
     def get_buff_damag(self, damag:int) -> str:
         if self.__hash__ in Swords.who_has_buff:
             return f"На меч {self.name} вже накладено баф"

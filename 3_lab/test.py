@@ -16,7 +16,7 @@ class TestSwordBonus(unittest.TestCase):
     def setUp(self) -> None:
         print("Проводимо початкову ініціалізацію для тестів....")
         self.sw = Axe() # створений макет на який можемо накласти баф отрути
-        self.sword = Swords(choice(SWORD_NAMES), "Legend", 1, 1, SwordBonus._nothing) # ми підмінили наш макет на реальний меч
+        self.sword = Swords(choice(SWORD_NAMES), "Legend", 1, 1) # ми підмінили наш макет на реальний меч
         self.sb = SwordBonus() # імплементація бонусів
         self.d, self.v = self.sw.damag, self.sw.vitality  # Початкове значення характеристик витягуємо через подвійне присвоєння
         return super().setUp()
@@ -42,8 +42,9 @@ class TestSwordBonus(unittest.TestCase):
         result = self.sb.bonus_strength(self.sw)
         self.assertEqual(result, f"Застосовано бонус сили до {self.sw.name}")
         self.assertGreater(self.sw.vitality, self.v, "Накладений бонус міцності не збільшив значення міцності.")
-        # Якщо ми передали неправильний обєкт, до якого не можна накласти баф, то ам просто поварнеться значення None
-        self.assertIsNone(self.sb.bonus_strength(1), "До цього обєкне не можна застосовувати накладення бафів, неправильний обєкт")
+        # Якщо ми передали неправильний обєкт, до якого не можна накласти баф, то винике помилка
+        with self.assertRaises(AssertionError, msg="До цього обєкта не можна застосовувати накладення бафів, неправильний обєкт"):
+            self.sb.bonus_strength(1)
     
     def test_bonus_confusion(self):
         """Тестуємо накладання бафу конфузії"""
@@ -66,8 +67,9 @@ class TestSwordBonus(unittest.TestCase):
         # тут тестуємо зміни які були здійснені накладанням бафу
         self.assertGreaterEqual(self.sw.damag, self.d, "Баф мав залишити рівним або збільшити значення Нанесення шкоди.")
         self.assertGreaterEqual(self.sw.vitality, self.v, "Баф мав залишити рівним або збільшити значення Міцності.")
-        # Якщо ми передали неправильний обєкт, до якого не можна накласти баф, то ам просто поварнеться значення None
-        self.assertIsNone(self.sb.bonus_confusion(1), "До цього обєкне не можна застосовувати накладення бафів, неправильний обєкт")
+        # Якщо ми передали неправильний обєкт, до якого не можна накласти баф, то нам просто виникне помилка
+        with self.assertRaises(AssertionError, msg="До цього обєкне не можна застосовувати накладення бафів, неправильний обєкт"):
+            self.sb.bonus_confusion(1)
         
     def test_bonus_berserk(self):
         """Тестуємо бонус Берсерка"""
@@ -87,12 +89,21 @@ class TestSwordBonus(unittest.TestCase):
         self.assertTrue(self.sw.vitality == 0)
         self.assertIsInstance(result, str, "Повернений результат повинен бути стрічкою.")
 
+    def test_bonus_invincible(self):
+        """Тестуємо бонус Незламності"""
+        v = self.sw.vitality # початкове значення витривалості
+        result = self.sb.bonus_invincible(self.sw)
+        self.assertGreater(self.sw.vitality, v, f"Після накладення бонусу значення {self.sw.vitality} має бути більшим за {v}")
+
     def test_bonus_apply_on_legendary_rarity(self):
         """Тестуємо що для меча з Легендарною ріднісністю буде додано випадковий бонус"""
         # викиристаємо альтернативний конструктор та створимо Легендарний меч
         s = Swords.create_from_rarity(choice(SWORD_NAMES), "Legend")
-        self.assertFalse(s.bonus == SwordBonus._nothing.__doc__, f"Легендарна рідкісність повинна мати бонус відмінний від {SwordBonus._nothing.__doc__}")
-        # TODO: ЦЕ ТЕСТ НЕ ПРОХОДИТЬ, потрібно фіксити клас де накладаються бафи
+        # Перевіряємо ми ще не наклали бонус
+        self.assertTrue(s.bonus == SwordBonus._nothing.__doc__, "Опис бонусу має відповідати пустому значення якщо ми ще не наклали Бонус")
+        bonus_description = s.apply_bonus() # Застосували бонус до Меча
+        self.assertTrue(s.bonus == bonus_description, f"Легендарна рідкісність повинна мати бонус відмінний від {SwordBonus._nothing.__doc__}")
+        # перевіряємо що накладений бонус збільшив атрибути Меча
         self.assertTrue(s.damag > (3 * Swords.rarity_map["Legend"]) or s.vitality > (5 * Swords.rarity_map["Legend"]), f"Накладений бонус {s.bonus} не збільшив атрибути шкоди {s.damag} або витривалості {s.vitality}")
 
 class TestApplyBuffs(unittest.TestCase):
@@ -128,14 +139,15 @@ class TestSwordsCreation(unittest.TestCase):
              'buff_damage': 0, 
              'buff_vitality': 0, 
              'debuff': []}
-        s = Swords(d["name"], d["rarity"], d["damag"], d["vitality"], SwordBonus._nothing)
+        s = Swords(d["name"], d["rarity"], d["damag"], d["vitality"])
         self.assertIsInstance(s, Swords, f"Щось пішло не так і меч не є класу {Swords.__repr__}")
         self.assertDictEqual(d, s.__dict__, f"У стореному Мечі немає базових атрибутів доступних через __dict__ {s.__dict__}")
     
     def test_create_sword_with_correct_rarity(self):
         """Тестуємо правильність сторення меча із задоною характеристикою рідкісності"""
         s = Swords.create_from_rarity("Тренувальний Меч", "Epic")
-        self.assertEqual(s.damag, 3*Swords.rarity_map["Epic"], "Неправильно вирахувано величину нанесення шкоди.")
+        s.apply_bonus()
+        self.assertGreaterEqual(s.damag, 3*Swords.rarity_map["Epic"], "Неправильно вирахувано величину нанесення шкоди.")
         # наступна перевірка. викличе помилку в ініціалізації Меча, але ми так і хочемо, тому ми виловлюємо цю помилку
         with self.assertRaises(AttributeError):
             Swords.create_from_rarity("Тренувальний Меч", "NonExist")
