@@ -1,9 +1,10 @@
 import unittest
+import pytest
 from random import randint, choice
 from axe import Axe
 from swords_bonus import SwordBonus
 from sword import Swords
-from app import SWORD_NAMES, create_players
+from app import SWORD_NAMES, create_players, select_buff
 
 # клас для тестування повинен починатись з слова Test
 class TestSwordBonus(unittest.TestCase):
@@ -169,6 +170,45 @@ class TestSwordsCreation(unittest.TestCase):
         s = Swords.create_random_rarity(name)
         self.assertIn(s.rarity, Swords.rarity_map.keys(), f"Рідкісність меча не відповідає заданим в {Swords.rarity_map.keys()}.")
         self.assertTrue(s.name == name, "Меч з випадковою рідкіснісю має неправильне Імя.")
+
+    # дану фікстуру нам підказав ChatGPT
+@pytest.fixture
+def sword():
+    """Фікстура для створення меча."""
+    return Swords.create_random_rarity(choice(SWORD_NAMES))
+    #return Axe()
+
+def test_sword_with_random_rarity(sword):
+    """Тестуємо меч з використання фікстур"""
+    assert hasattr(sword, 'rarity'), f"В обєкта неправильно встановлено атрибут рідкісності!"
+    assert isinstance(sword.rarity, str), "Назва типу рідкісності має бути словом/стрічкою."
+    assert sword.rarity in Swords.rarity_map.keys(), f"Рідкісність меча {sword.rarity} не відповідає заданим {Swords.rarity_map.keys()}"
+    assert isinstance(sword, Swords), f"Обєкт що тестується класу {type(sword)} має бути мечем класу {type(Swords)}"
+
+
+@pytest.fixture
+def player_select_attack():
+    return lambda _: "1"
+
+@pytest.fixture
+def player_select_defense():
+    return lambda _: "2"
+
+@pytest.fixture
+def player_select_nothing():
+    return lambda _: None
+
+def test_player_select_buffs(monkeypatch, player_select_attack, player_select_defense, player_select_nothing):
+    """Тестуємо правильність вводу гравцем значень для вибону накладання Бафу."""
+    monkeypatch.setattr('builtins.input', player_select_attack)
+    assert select_buff("Player1") == '1', "Неправильно введено вибір для атаки!"
+
+    monkeypatch.setattr('builtins.input', player_select_defense)
+    assert select_buff("Player1") == '2', "Неправильно введено вибір для захисту!"
+
+    monkeypatch.setattr('builtins.input', player_select_nothing)
+    assert select_buff("Player1") == None, "Гравець ввів не коректні дані!"
+
 
     def test_player_creation(monkeypatch):
         """Тестуємо правильність ініціалізаціцї гравців та їх Мечів"""
