@@ -42,6 +42,14 @@ class SwordBonus:
             item.vitality += 15
             return f"Застосовано бонус незламності {item.name}"
         
+    # Для екзамену
+    @staticmethod
+    def bonus_power(item) -> str:
+        """Новий бонус: Збільшення шкоди на 5"""
+        if SwordBonus.__check_obj(item):
+            item.damage += 5
+            return f"Застосовано бонус сили до {item.name}"
+
     @staticmethod
     def _nothing(item) -> str:
         """Пустий бонус для мечів з низькою якістю"""
@@ -49,8 +57,11 @@ class SwordBonus:
             return f"Меч {item.name} має занизьку рідкісність!"
     
     @staticmethod
+    # def list_bonus_methods() -> list:
+    #     """"""
+    #     return [method for method in dir(SwordBonus) if callable(getattr(SwordBonus, method)) and method.startswith("bonus_")]
     def list_bonus_methods() -> list:
-        """"""
+        """Знаходимо методи що надають бонуси, вони будуть починатись з bonus_, та повертаємо їх список"""
         return [method for method in dir(SwordBonus) if callable(getattr(SwordBonus, method)) and method.startswith("bonus_")]
 
     @staticmethod
